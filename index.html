@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GCSE Revision Timetable</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --teal-dark: #085041;
+    --coral: #D85A30;
+    --coral-light: #FAECE7;
+    --purple: #534AB7;
+    --purple-light: #EEEDFE;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --pink: #993556;
+    --pink-light: #FBEAF0;
+    --green: #3B6D11;
+    --green-light: #EAF3DE;
+    --gray: #5F5E5A;
+    --gray-light: #F1EFE8;
+    --red: #A32D2D;
+    --red-light: #FCEBEB;
+    --bg: #FAFAF8;
+    --card-bg: #FFFFFF;
+    --border: rgba(0,0,0,0.08);
+    --text: #1a1a18;
+    --muted: #888780;
+    --break-bg: #F1EFE8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+  .hero {
+    background: var(--teal-dark);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30%;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    margin-bottom: 0.3rem;
+    position: relative;
+    z-index: 1;
+  }
+  .hero p {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    position: relative;
+    z-index: 1;
+  }
+  .filters {
+    padding: 1.25rem 2rem;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-right: 0.25rem;
+  }
+  .pill {
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.15s;
+    background: var(--gray-light);
+    color: var(--gray);
+  }
+  .pill:hover { opacity: 0.8; }
+  .pill.active { border-color: currentColor; }
+  .pill-all.active { background: var(--teal); color: white; border-color: var(--teal); }
+
+  .main { padding: 1.5rem 2rem 3rem; max-width: 1200px; margin: 0 auto; }
+
+  .week-block { margin-bottom: 2.5rem; }
+  .week-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  .day-card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .day-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .day-name { font-weight: 600; font-size: 0.9rem; }
+  .day-date { font-size: 0.75rem; color: var(--muted); }
+  .slots { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  .slot {
+    border-radius: 8px;
+    padding: 0.45rem 0.7rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+  .slot-time {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    padding-top: 2px;
+    min-width: 42px;
+  }
+  .slot-content { flex: 1; }
+  .slot-subject { font-size: 0.82rem; font-weight: 500; line-height: 1.3; }
+  .slot-detail { font-size: 0.72rem; margin-top: 1px; opacity: 0.75; }
+  .slot-break {
+    background: var(--break-bg);
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-style: italic;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+  .exam-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 5px;
+    vertical-align: middle;
+    background: var(--coral-light);
+    color: var(--coral);
+  }
+  .day-exam-alert {
+    margin: 0 0.5rem 0.5rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 8px;
+    background: var(--coral-light);
+    color: var(--coral);
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  /* subject colors */
+  .s-history { background: #EAF3DE; color: #27500A; }
+  .s-english-lit { background: #EEEDFE; color: #3C3489; }
+  .s-english-lang { background: #E6EEF9; color: #184080; }
+  .s-re { background: #FAEEDA; color: #633806; }
+  .s-biology { background: #E1F5EE; color: #085041; }
+  .s-chemistry { background: #E6F1FB; color: #0C447C; }
+  .s-physics { background: #F0EAF9; color: #3C3489; }
+  .s-geography { background: #EAF3DE; color: #3B6D11; }
+  .s-maths { background: #FAEEDA; color: #854F0B; }
+  .s-spanish { background: #FAECE7; color: #712B13; }
+  .s-art { background: #FBEAF0; color: #72243E; }
+  .s-free { background: transparent; color: var(--muted); }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    padding: 1rem 2rem;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.72rem; color: var(--muted);
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 3px;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--teal-light);
+    margin: 0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--teal-dark));
+    width: 0%;
+    transition: width 0.6s ease;
+  }
+  @media (max-width: 600px) {
+    .hero { padding: 1.5rem 1rem 1.25rem; }
+    .main { padding: 1rem 1rem 2rem; }
+    .filters { padding: 1rem; }
+    .legend { padding: 0.75rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>GCSE Revision Timetable</h1>
+  <p>28 March – 17 June 2026 &nbsp;·&nbsp; 09:00 – 18:00 (11:00 Sundays) &nbsp;·&nbsp; 15 min breaks included</p>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+
+<div class="legend">
+  <span class="legend-item"><span class="legend-dot" style="background:#27500A"></span>History</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#3C3489"></span>Eng Lit / Physics</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#184080"></span>Eng Lang</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#633806"></span>RE</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#085041"></span>Biology</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#0C447C"></span>Chemistry</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#3B6D11"></span>Geography</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#854F0B"></span>Maths</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#712B13"></span>Spanish</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#72243E"></span>Art</span>
+</div>
+
+<div class="filters">
+  <span class="filter-label">Filter:</span>
+  <span class="pill pill-all active" onclick="filterSubject('all', this)">All subjects</span>
+  <span class="pill" onclick="filterSubject('history', this)" style="background:#EAF3DE;color:#27500A">History</span>
+  <span class="pill" onclick="filterSubject('english', this)" style="background:#EEEDFE;color:#3C3489">English</span>
+  <span class="pill" onclick="filterSubject('re', this)" style="background:#FAEEDA;color:#633806">RE</span>
+  <span class="pill" onclick="filterSubject('biology', this)" style="background:#E1F5EE;color:#085041">Biology</span>
+  <span class="pill" onclick="filterSubject('chemistry', this)" style="background:#E6F1FB;color:#0C447C">Chemistry</span>
+  <span class="pill" onclick="filterSubject('physics', this)" style="background:#F0EAF9;color:#3C3489">Physics</span>
+  <span class="pill" onclick="filterSubject('geography', this)" style="background:#EAF3DE;color:#3B6D11">Geography</span>
+  <span class="pill" onclick="filterSubject('maths', this)" style="background:#FAEEDA;color:#854F0B">Maths</span>
+  <span class="pill" onclick="filterSubject('spanish', this)" style="background:#FAECE7;color:#712B13">Spanish</span>
+</div>
+
+<div class="main" id="timetable"></div>
+
+<script>
+const EXAMS = [
+  { date: '2026-04-22', subject: 'Art & Design (Textiles)', paper: 'External Task', time: '8:45' },
+  { date: '2026-05-07', subject: 'History', paper: 'Structured Questions 12', time: '9:00' },
+  { date: '2026-05-11', subject: 'English Literature', paper: 'Paper 1', time: '9:00' },
+  { date: '2026-05-12', subject: 'Religious Studies', paper: 'Catholic Christianity', time: '9:00' },
+  { date: '2026-05-12', subject: 'Biology', paper: 'Paper 1 (H)', time: '13:30' },
+  { date: '2026-05-13', subject: 'Geography', paper: 'Physical Environment', time: '9:00' },
+  { date: '2026-05-14', subject: 'Maths iGCSE', paper: 'Written Paper 1H', time: '9:00' },
+  { date: '2026-05-15', subject: 'History', paper: 'Document Questions 22', time: '9:00' },
+  { date: '2026-05-18', subject: 'Chemistry', paper: 'Paper 1 (H)', time: '9:00' },
+  { date: '2026-05-19', subject: 'English Literature', paper: 'Paper 2', time: '9:00' },
+  { date: '2026-05-20', subject: 'Religious Studies', paper: 'Judaism', time: '13:30' },
+  { date: '2026-05-21', subject: 'English Language', paper: 'Paper 1', time: '9:00' },
+  { date: '2026-06-01', subject: 'Religious Studies', paper: 'Catholic Christianity', time: '13:30' },
+  { date: '2026-06-02', subject: 'Physics', paper: 'Paper 1 (H)', time: '9:00' },
+  { date: '2026-06-03', subject: 'Maths iGCSE', paper: 'Written Paper 2H', time: '9:00' },
+  { date: '2026-06-03', subject: 'Geography', paper: 'Human Environment', time: '13:30' },
+  { date: '2026-06-05', subject: 'English Language', paper: 'Paper 2', time: '9:00' },
+  { date: '2026-06-08', subject: 'Biology', paper: 'Paper 2 (H)', time: '9:00' },
+  { date: '2026-06-09', subject: 'Spanish', paper: 'Listening (H)', time: '9:00' },
+  { date: '2026-06-11', subject: 'Geography', paper: 'Investigations', time: '9:00' },
+  { date: '2026-06-12', subject: 'Chemistry', paper: 'Paper 2 (H)', time: '9:00' },
+  { date: '2026-06-15', subject: 'Physics', paper: 'Paper 2 (H)', time: '9:00' },
+  { date: '2026-06-16', subject: 'Spanish', paper: 'Reading (H)', time: '9:00' },
+  { date: '2026-06-17', subject: 'Spanish', paper: 'Writing (H)', time: '9:00' },
+];
+
+const SUBJECTS = [
+  'History','English Literature','English Language','Religious Studies',
+  'Biology','Chemistry','Physics','Geography','Maths','Spanish','Art'
+];
+
+const subjectColor = s => {
+  if (s.includes('History')) return 's-history';
+  if (s.includes('English Lit') || s.includes('Literature')) return 's-english-lit';
+  if (s.includes('English Lang') || s.includes('Language')) return 's-english-lang';
+  if (s.includes('Religious') || s.includes('RE')) return 's-re';
+  if (s.includes('Biology')) return 's-biology';
+  if (s.includes('Chemistry')) return 's-chemistry';
+  if (s.includes('Physics')) return 's-physics';
+  if (s.includes('Geography')) return 's-geography';
+  if (s.includes('Maths') || s.includes('Math')) return 's-maths';
+  if (s.includes('Spanish')) return 's-spanish';
+  if (s.includes('Art')) return 's-art';
+  return 's-free';
+};
+
+const subjectKey = s => {
+  if (s.includes('History')) return 'history';
+  if (s.includes('English')) return 'english';
+  if (s.includes('Religious')) return 're';
+  if (s.includes('Biology')) return 'biology';
+  if (s.includes('Chemistry')) return 'chemistry';
+  if (s.includes('Physics')) return 'physics';
+  if (s.includes('Geography')) return 'geography';
+  if (s.includes('Maths')) return 'maths';
+  if (s.includes('Spanish')) return 'spanish';
+  if (s.includes('Art')) return 'art';
+  return '';
+};
+
+function dateStr(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function addDays(d, n) {
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
+}
+
+function upcomingExam(dateStr, days = 3) {
+  const target = new Date(dateStr);
+  return EXAMS.filter(e => {
+    const ed = new Date(e.date);
+    const diff = (ed - target) / 86400000;
+    return diff >= 0 && diff <= days;
+  });
+}
+
+function nextExamSubject(dateISO) {
+  const d = new Date(dateISO);
+  const upcoming = EXAMS.filter(e => new Date(e.date) >= d)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  return upcoming.length ? upcoming[0].subject : null;
+}
+
+const REVISION_CYCLE = [
+  'History','English Literature','Religious Studies',
+  'Biology','Chemistry','Physics',
+  'Geography','Maths','Spanish',
+  'English Language','History','Biology',
+  'Chemistry','Physics','Geography',
+  'Maths','English Literature','Spanish',
+  'Religious Studies','English Language'
+];
+
+function buildDaySlots(dateISO, isSunday) {
+  const fmt = (h, m) => `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  const addMins = (h, m, mins) => {
+    let total = h * 60 + m + mins;
+    return { h: Math.floor(total / 60), m: total % 60 };
+  };
+
+  const todayExams = EXAMS.filter(e => e.date === dateISO);
+  const soonExams = upcomingExam(dateISO, 2);
+  const d = new Date(dateISO);
+  const dayOfYear = Math.floor((d - new Date('2026-03-28')) / 86400000);
+  const subjectIndex = dayOfYear % REVISION_CYCLE.length;
+
+  // Build a fixed schedule of {type, duration} entries
+  // Weekday 09:00–18:00 = 540 min: 5×90 study + 3×15 break + 1×30 lunch = 450+45+30 = 525 → last block ends 17:45, wind-down 17:45–18:00
+  // Sunday  11:00–18:00 = 420 min: 4×90 study + 2×15 break + 1×30 lunch = 360+30+30 = 420 → ends exactly 18:00
+  const schedule = isSunday
+    ? [
+        { type: 'study' },
+        { type: 'break', label: '15 min break', mins: 15 },
+        { type: 'study' },
+        { type: 'break', label: 'Lunch — 30 min', mins: 30 },
+        { type: 'study' },
+        { type: 'break', label: '15 min break', mins: 15 },
+        { type: 'study' },
+      ]
+    : [
+        { type: 'study' },
+        { type: 'break', label: '15 min break', mins: 15 },
+        { type: 'study' },
+        { type: 'break', label: 'Lunch — 30 min', mins: 30 },
+        { type: 'study' },
+        { type: 'break', label: '15 min break', mins: 15 },
+        { type: 'study' },
+        { type: 'break', label: '15 min break', mins: 15 },
+        { type: 'study' },
+        { type: 'break', label: 'Wind-down — 15 min', mins: 15 },
+      ];
+
+  let hour = isSunday ? 11 : 9;
+  let min = 0;
+  const slots = [];
+  let blockCount = 0;
+
+  for (const entry of schedule) {
+    if (entry.type === 'break') {
+      slots.push({ type: 'break', label: entry.label, time: fmt(hour, min) });
+      const next = addMins(hour, min, entry.mins);
+      hour = next.h; min = next.m;
+    } else {
+      const slotEnd = addMins(hour, min, 90);
+      let subj = REVISION_CYCLE[(subjectIndex + blockCount) % REVISION_CYCLE.length];
+      if (soonExams.length && blockCount < 2) {
+        subj = soonExams[Math.min(blockCount, soonExams.length - 1)].subject;
+      }
+      const hint = soonExams.find(e => e.subject === subj);
+      slots.push({
+        type: 'study',
+        time: fmt(hour, min),
+        endTime: fmt(slotEnd.h, slotEnd.m),
+        subject: subj,
+        note: hint ? `Exam: ${hint.paper} on ${fmtDate(hint.date)}` : revisionNote(subj, blockCount),
+      });
+      blockCount++;
+      hour = slotEnd.h; min = slotEnd.m;
+    }
+  }
+
+  return { slots, todayExams };
+}
+
+const revisionNotes = {
+  'History': ['Past paper structured Qs','Source analysis practice','Key dates + events','Timeline review'],
+  'English Literature': ['Close reading practice','Essay planning','Quotes & analysis','Context notes'],
+  'English Language': ['Reading comprehension','Writing techniques','Timed extracts','Vocabulary'],
+  'Religious Studies': ['Catholic Christianity notes','Judaism key beliefs','Past paper Qs','Quotes & teachings'],
+  'Biology': ['Cell biology revision','Diagrams & processes','Past paper MCQs','Key definitions'],
+  'Chemistry': ['Equations & formulae','Required practicals','Atomic structure','Past paper Qs'],
+  'Physics': ['Forces & motion','Electricity revision','Past paper Qs','Formulae sheet'],
+  'Geography': ['Physical processes','Human geography','Case studies','Map skills'],
+  'Maths': ['Algebra & equations','Geometry & graphs','Past paper Qs','Calculator skills'],
+  'Spanish': ['Listening practice','Vocabulary lists','Writing frames','Grammar revision'],
+  'Art': ['Portfolio review','Technique practice','Artist analysis','Final piece prep'],
+};
+function revisionNote(subj, i) {
+  const key = Object.keys(revisionNotes).find(k => subj.includes(k));
+  if (!key) return 'Revision & practice';
+  const arr = revisionNotes[key];
+  return arr[i % arr.length];
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function buildTimetable() {
+  const container = document.getElementById('timetable');
+  const start = new Date('2026-03-28');
+  const endDate = new Date('2026-06-17');
+
+  let current = new Date(start);
+  let weekStart = new Date(start);
+  let weeksHTML = '';
+  let weekNum = 1;
+  let daysHTML = '';
+  let daysInWeek = 0;
+
+  while (current <= endDate) {
+    const dow = current.getDay(); // 0=Sun
+    if (dow === 1 && daysInWeek > 0) {
+      weeksHTML += `<div class="week-block" data-week="${weekNum}">
+        <div class="week-label">Week ${weekNum} &mdash; ${fmtDate(dateStr(weekStart))}</div>
+        <div class="days-grid">${daysHTML}</div>
+      </div>`;
+      weekNum++;
+      daysHTML = '';
+      daysInWeek = 0;
+      weekStart = new Date(current);
+    }
+
+    const iso = dateStr(current);
+    const isSunday = dow === 0;
+    const { slots, todayExams } = buildDaySlots(iso, isSunday);
+
+    const examAlertsHTML = todayExams.map(e =>
+      `<div class="day-exam-alert"><span class="dot"></span>EXAM: ${e.subject} — ${e.paper} at ${e.time}</div>`
+    ).join('');
+
+    const slotsHTML = slots.map(sl => {
+      if (sl.type === 'break') {
+        return `<div class="slot-break">${sl.time} — ${sl.label}</div>`;
+      }
+      const cls = subjectColor(sl.subject);
+      const key = subjectKey(sl.subject);
+      return `<div class="slot ${cls}" data-subject="${key}">
+        <span class="slot-time">${sl.time}</span>
+        <div class="slot-content">
+          <div class="slot-subject">${sl.subject}</div>
+          <div class="slot-detail">${sl.note}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    daysHTML += `<div class="day-card" data-date="${iso}">
+      <div class="day-header">
+        <span class="day-name">${DAY_NAMES[dow]}</span>
+        <span class="day-date">${current.getDate()} ${MONTH_NAMES[current.getMonth()]}</span>
+      </div>
+      ${examAlertsHTML}
+      <div class="slots">${slotsHTML}</div>
+    </div>`;
+    daysInWeek++;
+
+    current = addDays(current, 1);
+  }
+
+  if (daysHTML) {
+    weeksHTML += `<div class="week-block" data-week="${weekNum}">
+      <div class="week-label">Week ${weekNum} &mdash; ${fmtDate(dateStr(weekStart))}</div>
+      <div class="days-grid">${daysHTML}</div>
+    </div>`;
+  }
+
+  container.innerHTML = weeksHTML;
+
+  const today = dateStr(new Date());
+  const todayCard = container.querySelector(`[data-date="${today}"]`);
+  if (todayCard) {
+    todayCard.style.border = '2px solid var(--teal)';
+    todayCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // progress bar
+  const totalDays = (endDate - start) / 86400000;
+  const doneDays = Math.max(0, (new Date() - start) / 86400000);
+  document.getElementById('prog').style.width = Math.min(100, (doneDays / totalDays) * 100) + '%';
+}
+
+function filterSubject(key, el) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+
+  document.querySelectorAll('.slot[data-subject]').forEach(s => {
+    if (key === 'all' || s.dataset.subject === key) {
+      s.style.opacity = '1';
+      s.style.filter = 'none';
+    } else {
+      s.style.opacity = '0.18';
+      s.style.filter = 'grayscale(1)';
+    }
+  });
+}
+
+buildTimetable();
+</script>
+</body>
+</html>

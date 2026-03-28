@@ -36,7 +36,6 @@
   .pill-view-all.active{background:var(--teal);color:white;border-color:var(--teal);}
   .pill-exams{background:#FAECE7;color:#993C1D;}
   .pill-exams.active{background:#D85A30;color:white;border-color:#D85A30;}
-  .pill-subj.active{border-color:currentColor;}
   .main{padding:1.5rem 2rem 3rem;max-width:1200px;margin:0 auto;}
   .week-block{margin-bottom:2.5rem;}
   .week-label{font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;}
@@ -52,14 +51,15 @@
   .slot-content{flex:1;}
   .slot-subject{font-size:0.82rem;font-weight:500;line-height:1.3;}
   .slot-detail{font-size:0.72rem;margin-top:1px;opacity:0.75;}
-  .slot-break{background:var(--break-bg);color:var(--muted);font-size:0.75rem;font-style:italic;padding:0.3rem 0.7rem;border-radius:6px;text-align:center;letter-spacing:0.02em;}
+  .slot-break{background:var(--break-bg);color:var(--muted);font-size:0.75rem;font-style:italic;padding:0.3rem 0.7rem;border-radius:6px;text-align:center;}
+  .slot-gap{background:#FEF3EE;color:#993C1D;font-size:0.73rem;font-style:italic;padding:0.3rem 0.7rem;border-radius:6px;text-align:center;}
+  .slot-morning-free{background:#FEF9F0;color:#854F0B;font-size:0.73rem;font-weight:500;padding:0.4rem 0.7rem;border-radius:6px;text-align:center;}
   .slot-exam-card{background:#FAECE7;border:1.5px solid #F5C4B3;border-radius:8px;padding:0.45rem 0.7rem;display:flex;gap:0.6rem;align-items:flex-start;transition:opacity 0.2s,filter 0.2s;}
   .slot-exam-card .slot-subject{color:#712B13;font-weight:600;}
   .slot-exam-card .slot-detail{color:#993C1D;}
   .exam-divider{font-size:0.68rem;font-weight:600;color:#993C1D;text-transform:uppercase;letter-spacing:0.07em;padding:0.2rem 0.7rem 0.1rem;}
   .day-exam-alert{margin:0 0.5rem 0.5rem;padding:0.4rem 0.7rem;border-radius:8px;background:var(--coral-light);color:var(--coral);font-size:0.75rem;font-weight:500;display:flex;align-items:center;gap:0.4rem;}
   .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
-  /* subject colours */
   .s-history{background:#EAF3DE;color:#27500A;}
   .s-english-lit{background:#EEEDFE;color:#3C3489;}
   .s-english-lang{background:#E6EEF9;color:#184080;}
@@ -86,7 +86,7 @@
 
 <div class="hero">
   <h1>GCSE Revision Timetable</h1>
-  <p>29 March – 17 June 2026 &nbsp;·&nbsp; 09:00–18:00 (11:00 Sundays) &nbsp;·&nbsp; 15 min breaks included</p>
+  <p>29 March &ndash; 17 June 2026 &nbsp;&middot;&nbsp; 09:00&ndash;18:00 (11:00 Sundays) &nbsp;&middot;&nbsp; 15 min breaks included</p>
 </div>
 <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
 
@@ -114,52 +114,50 @@
   <div class="filter-sep"></div>
   <div class="filter-group">
     <span class="filter-label">Subject:</span>
-    <span class="pill pill-subj active" data-subj="all"       onclick="setSubject('all',this)">All</span>
-    <span class="pill pill-subj" data-subj="history"          onclick="setSubject('history',this)"   style="background:#EAF3DE;color:#27500A">History</span>
-    <span class="pill pill-subj" data-subj="english"          onclick="setSubject('english',this)"   style="background:#EEEDFE;color:#3C3489">English</span>
-    <span class="pill pill-subj" data-subj="re"               onclick="setSubject('re',this)"        style="background:#FAEEDA;color:#633806">RE</span>
-    <span class="pill pill-subj" data-subj="biology"          onclick="setSubject('biology',this)"   style="background:#E1F5EE;color:#085041">Biology</span>
-    <span class="pill pill-subj" data-subj="chemistry"        onclick="setSubject('chemistry',this)" style="background:#E6F1FB;color:#0C447C">Chemistry</span>
-    <span class="pill pill-subj" data-subj="physics"          onclick="setSubject('physics',this)"   style="background:#F0EAF9;color:#3C3489">Physics</span>
-    <span class="pill pill-subj" data-subj="geography"        onclick="setSubject('geography',this)" style="background:#EAF3DE;color:#3B6D11">Geography</span>
-    <span class="pill pill-subj" data-subj="maths"            onclick="setSubject('maths',this)"     style="background:#FAEEDA;color:#854F0B">Maths</span>
-    <span class="pill pill-subj" data-subj="spanish"          onclick="setSubject('spanish',this)"   style="background:#FAECE7;color:#712B13">Spanish</span>
-    <span class="pill pill-subj" data-subj="textiles"         onclick="setSubject('textiles',this)"  style="background:#F5E8F8;color:#6B2D8B">Textiles</span>
+    <span class="pill pill-subj active" onclick="setSubject('all',this)">All</span>
+    <span class="pill pill-subj" onclick="setSubject('history',this)"   style="background:#EAF3DE;color:#27500A">History</span>
+    <span class="pill pill-subj" onclick="setSubject('english',this)"   style="background:#EEEDFE;color:#3C3489">English</span>
+    <span class="pill pill-subj" onclick="setSubject('re',this)"        style="background:#FAEEDA;color:#633806">RE</span>
+    <span class="pill pill-subj" onclick="setSubject('biology',this)"   style="background:#E1F5EE;color:#085041">Biology</span>
+    <span class="pill pill-subj" onclick="setSubject('chemistry',this)" style="background:#E6F1FB;color:#0C447C">Chemistry</span>
+    <span class="pill pill-subj" onclick="setSubject('physics',this)"   style="background:#F0EAF9;color:#3C3489">Physics</span>
+    <span class="pill pill-subj" onclick="setSubject('geography',this)" style="background:#EAF3DE;color:#3B6D11">Geography</span>
+    <span class="pill pill-subj" onclick="setSubject('maths',this)"     style="background:#FAEEDA;color:#854F0B">Maths</span>
+    <span class="pill pill-subj" onclick="setSubject('spanish',this)"   style="background:#FAECE7;color:#712B13">Spanish</span>
+    <span class="pill pill-subj" onclick="setSubject('textiles',this)"  style="background:#F5E8F8;color:#6B2D8B">Textiles</span>
   </div>
 </div>
 
 <div class="main" id="timetable"></div>
 
 <script>
-/* ── Exam data ─────────────────────────────────────────────────────── */
 const EXAMS = [
-  {date:'2026-04-22',subject:'Art & Design: Textiles',paper:'External Task',        time:'8:45', dur:null},
-  {date:'2026-05-07',subject:'History',               paper:'Structured Questions 12',time:'9:00', dur:120},
-  {date:'2026-05-11',subject:'English Literature',    paper:'Paper 1',              time:'9:00', dur:105},
-  {date:'2026-05-12',subject:'Religious Studies',     paper:'Catholic Christianity', time:'9:00', dur:105},
-  {date:'2026-05-12',subject:'Biology',               paper:'Paper 1 (H)',          time:'13:30',dur:105},
-  {date:'2026-05-13',subject:'Geography',             paper:'Physical Environment',  time:'9:00', dur:105},
-  {date:'2026-05-14',subject:'Maths',                 paper:'Written Paper 1H',     time:'9:00', dur:120},
-  {date:'2026-05-15',subject:'History',               paper:'Document Questions 22', time:'9:00', dur:105},
-  {date:'2026-05-18',subject:'Chemistry',             paper:'Paper 1 (H)',          time:'9:00', dur:105},
-  {date:'2026-05-19',subject:'English Literature',    paper:'Paper 2',              time:'9:00', dur:135},
-  {date:'2026-05-20',subject:'Religious Studies',     paper:'Judaism',              time:'13:30',dur:50},
-  {date:'2026-05-21',subject:'English Language',      paper:'Paper 1',              time:'9:00', dur:105},
-  {date:'2026-06-01',subject:'Religious Studies',     paper:'Catholic Christianity', time:'13:30',dur:50},
-  {date:'2026-06-02',subject:'Physics',               paper:'Paper 1 (H)',          time:'9:00', dur:105},
-  {date:'2026-06-03',subject:'Maths',                 paper:'Written Paper 2H',     time:'9:00', dur:120},
-  {date:'2026-06-03',subject:'Geography',             paper:'Human Environment',     time:'13:30',dur:90},
-  {date:'2026-06-05',subject:'English Language',      paper:'Paper 2',              time:'9:00', dur:105},
-  {date:'2026-06-08',subject:'Biology',               paper:'Paper 2 (H)',          time:'9:00', dur:105},
-  {date:'2026-06-09',subject:'Spanish',               paper:'Listening (H)',        time:'9:00', dur:60},
-  {date:'2026-06-11',subject:'Geography',             paper:'Investigations',       time:'9:00', dur:90},
-  {date:'2026-06-12',subject:'Chemistry',             paper:'Paper 2 (H)',          time:'9:00', dur:105},
-  {date:'2026-06-15',subject:'Physics',               paper:'Paper 2 (H)',          time:'9:00', dur:105},
-  {date:'2026-06-16',subject:'Spanish',               paper:'Reading (H)',          time:'9:00', dur:60},
-  {date:'2026-06-17',subject:'Spanish',               paper:'Writing (H)',          time:'9:00', dur:80},
+  {date:'2026-04-22',subject:'Art & Design: Textiles',paper:'External Task',          time:'08:45',dur:null},
+  {date:'2026-05-07',subject:'History',               paper:'Structured Questions 12', time:'09:00',dur:120},
+  {date:'2026-05-11',subject:'English Literature',    paper:'Paper 1',                time:'09:00',dur:105},
+  {date:'2026-05-12',subject:'Religious Studies',     paper:'Catholic Christianity',   time:'09:00',dur:105},
+  {date:'2026-05-12',subject:'Biology',               paper:'Paper 1 (H)',             time:'13:30',dur:105},
+  {date:'2026-05-13',subject:'Geography',             paper:'Physical Environment',    time:'09:00',dur:105},
+  {date:'2026-05-14',subject:'Maths',                 paper:'Written Paper 1H',        time:'09:00',dur:120},
+  {date:'2026-05-15',subject:'History',               paper:'Document Questions 22',   time:'09:00',dur:105},
+  {date:'2026-05-18',subject:'Chemistry',             paper:'Paper 1 (H)',             time:'09:00',dur:105},
+  {date:'2026-05-19',subject:'English Literature',    paper:'Paper 2',                time:'09:00',dur:135},
+  {date:'2026-05-20',subject:'Religious Studies',     paper:'Judaism',                time:'13:30',dur:50},
+  {date:'2026-05-21',subject:'English Language',      paper:'Paper 1',                time:'09:00',dur:105},
+  {date:'2026-06-01',subject:'Religious Studies',     paper:'Catholic Christianity',   time:'13:30',dur:50},
+  {date:'2026-06-02',subject:'Physics',               paper:'Paper 1 (H)',             time:'09:00',dur:105},
+  {date:'2026-06-03',subject:'Maths',                 paper:'Written Paper 2H',        time:'09:00',dur:120},
+  {date:'2026-06-03',subject:'Geography',             paper:'Human Environment',       time:'13:30',dur:90},
+  {date:'2026-06-05',subject:'English Language',      paper:'Paper 2',                time:'09:00',dur:105},
+  {date:'2026-06-08',subject:'Biology',               paper:'Paper 2 (H)',             time:'09:00',dur:105},
+  {date:'2026-06-09',subject:'Spanish',               paper:'Listening (H)',           time:'09:00',dur:60},
+  {date:'2026-06-11',subject:'Geography',             paper:'Investigations',          time:'09:00',dur:90},
+  {date:'2026-06-12',subject:'Chemistry',             paper:'Paper 2 (H)',             time:'09:00',dur:105},
+  {date:'2026-06-15',subject:'Physics',               paper:'Paper 2 (H)',             time:'09:00',dur:105},
+  {date:'2026-06-16',subject:'Spanish',               paper:'Reading (H)',             time:'09:00',dur:60},
+  {date:'2026-06-17',subject:'Spanish',               paper:'Writing (H)',             time:'09:00',dur:80},
 ];
 
-/* 2 × 3-hour Textiles sessions (first two 90-min study blocks) on Sundays before 22 Apr exam */
 const TEXTILES_DATES = new Set(['2026-03-29','2026-04-05']);
 
 const REVISION_CYCLE = [
@@ -172,245 +170,260 @@ const REVISION_CYCLE = [
   'Religious Studies','English Language'
 ];
 
-/* ── Helpers ───────────────────────────────────────────────────────── */
-const fmt  = (h,m) => `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-const addM = (h,m,mins) => { const t=h*60+m+mins; return {h:Math.floor(t/60),m:t%60}; };
-const dateStr  = d => d.toISOString().split('T')[0];
-const addDays  = (d,n) => { const r=new Date(d); r.setDate(r.getDate()+n); return r; };
-const fmtDate  = iso => new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const fmt     = (h,m) => String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+const dateStr = d => d.toISOString().split('T')[0];
+const addDays = (d,n) => { const r=new Date(d); r.setDate(r.getDate()+n); return r; };
+const fmtDate = iso => new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const toMins  = t => { const p=(t||'00:00').split(':').map(Number); return p[0]*60+(p[1]||0); };
 
 const subjectKey = s => {
-  if (s.includes('Textiles'))  return 'textiles';
-  if (s.includes('Art'))       return 'art';
-  if (s.includes('History'))   return 'history';
-  if (s.includes('Literature'))return 'english';
-  if (s.includes('Language'))  return 'english';
-  if (s.includes('Religious')) return 're';
-  if (s.includes('Biology'))   return 'biology';
-  if (s.includes('Chemistry')) return 'chemistry';
-  if (s.includes('Physics'))   return 'physics';
-  if (s.includes('Geography')) return 'geography';
-  if (s.includes('Maths'))     return 'maths';
-  if (s.includes('Spanish'))   return 'spanish';
+  if(s.includes('Textiles'))  return 'textiles';
+  if(s.includes('Art'))       return 'art';
+  if(s.includes('History'))   return 'history';
+  if(s.includes('Literature'))return 'english';
+  if(s.includes('Language'))  return 'english';
+  if(s.includes('Religious')) return 're';
+  if(s.includes('Biology'))   return 'biology';
+  if(s.includes('Chemistry')) return 'chemistry';
+  if(s.includes('Physics'))   return 'physics';
+  if(s.includes('Geography')) return 'geography';
+  if(s.includes('Maths'))     return 'maths';
+  if(s.includes('Spanish'))   return 'spanish';
   return '';
 };
 
 const subjectColor = s => {
-  if (s.includes('Textiles'))  return 's-textiles';
-  if (s.includes('Art'))       return 's-art';
-  if (s.includes('History'))   return 's-history';
-  if (s.includes('Literature'))return 's-english-lit';
-  if (s.includes('Language'))  return 's-english-lang';
-  if (s.includes('Religious')) return 's-re';
-  if (s.includes('Biology'))   return 's-biology';
-  if (s.includes('Chemistry')) return 's-chemistry';
-  if (s.includes('Physics'))   return 's-physics';
-  if (s.includes('Geography')) return 's-geography';
-  if (s.includes('Maths'))     return 's-maths';
-  if (s.includes('Spanish'))   return 's-spanish';
+  if(s.includes('Textiles'))  return 's-textiles';
+  if(s.includes('Art'))       return 's-art';
+  if(s.includes('History'))   return 's-history';
+  if(s.includes('Literature'))return 's-english-lit';
+  if(s.includes('Language'))  return 's-english-lang';
+  if(s.includes('Religious')) return 's-re';
+  if(s.includes('Biology'))   return 's-biology';
+  if(s.includes('Chemistry')) return 's-chemistry';
+  if(s.includes('Physics'))   return 's-physics';
+  if(s.includes('Geography')) return 's-geography';
+  if(s.includes('Maths'))     return 's-maths';
+  if(s.includes('Spanish'))   return 's-spanish';
   return 's-free';
 };
 
-const revisionNotes = {
-  'History':           ['Past paper structured Qs','Source analysis practice','Key dates + events','Timeline review','Essay planning'],
-  'Literature':        ['Close reading practice','Essay planning','Quotes & analysis','Context notes','Comparative essay'],
-  'Language':          ['Reading comprehension','Writing techniques','Timed extracts','Vocabulary','Descriptive writing'],
-  'Religious':         ['Catholic Christianity notes','Judaism key beliefs','Past paper Qs','Quotes & teachings','Ethics topics'],
-  'Biology':           ['Cell biology revision','Diagrams & processes','Past paper MCQs','Key definitions','Ecology'],
-  'Chemistry':         ['Equations & formulae','Required practicals','Atomic structure','Past paper Qs','Organic chemistry'],
-  'Physics':           ['Forces & motion','Electricity revision','Past paper Qs','Formulae sheet','Waves & optics'],
-  'Geography':         ['Physical processes','Human geography','Case studies','Map skills','Fieldwork'],
-  'Maths':             ['Algebra & equations','Geometry & graphs','Past paper Qs','Calculator skills','Statistics'],
-  'Spanish':           ['Listening practice','Vocabulary lists','Writing frames','Grammar revision','Reading comprehension'],
-  'Art':               ['Portfolio review','Technique practice','Artist analysis','Final piece prep','Annotation'],
-  'Textiles':          ['Fabric samples & swatches','Design development','Construction techniques','Designer research','Final piece work','Evaluation writing'],
+const RN = {
+  'History':    ['Past paper structured Qs','Source analysis practice','Key dates + events','Timeline review','Essay planning'],
+  'Literature': ['Close reading practice','Essay planning','Quotes & analysis','Context notes','Comparative essay'],
+  'Language':   ['Reading comprehension','Writing techniques','Timed extracts','Vocabulary','Descriptive writing'],
+  'Religious':  ['Catholic Christianity notes','Judaism key beliefs','Past paper Qs','Quotes & teachings','Ethics topics'],
+  'Biology':    ['Cell biology revision','Diagrams & processes','Past paper MCQs','Key definitions','Ecology'],
+  'Chemistry':  ['Equations & formulae','Required practicals','Atomic structure','Past paper Qs','Organic chemistry'],
+  'Physics':    ['Forces & motion','Electricity revision','Past paper Qs','Formulae sheet','Waves & optics'],
+  'Geography':  ['Physical processes','Human geography','Case studies','Map skills','Fieldwork'],
+  'Maths':      ['Algebra & equations','Geometry & graphs','Past paper Qs','Calculator skills','Statistics'],
+  'Spanish':    ['Listening practice','Vocabulary lists','Writing frames','Grammar revision','Reading comprehension'],
+  'Art':        ['Portfolio review','Technique practice','Artist analysis','Final piece prep','Annotation'],
+  'Textiles':   ['Fabric samples & swatches','Design development','Construction techniques','Designer research','Final piece work','Evaluation writing'],
 };
-
 function revisionNote(subj, i) {
-  const key = Object.keys(revisionNotes).find(k => subj.includes(k));
-  if (!key) return 'Revision & practice';
-  return revisionNotes[key][i % revisionNotes[key].length];
+  const k = Object.keys(RN).find(k => subj.includes(k));
+  return k ? RN[k][i % RN[k].length] : 'Revision & practice';
 }
 
-/* subjects that have an exam running on this day — exclude from revision */
-function blockedOnDay(dateISO) {
+function blockedOnDay(iso) {
   const s = new Set();
-  EXAMS.filter(e => e.date === dateISO).forEach(e => {
-    const k = subjectKey(e.subject);
-    if (k) s.add(k);
-  });
+  EXAMS.filter(e=>e.date===iso).forEach(e=>{ const k=subjectKey(e.subject); if(k) s.add(k); });
   return s;
 }
 
-/* pick next subject from cycle skipping blocked & already-used */
 function pickSubject(startIdx, blocked, used) {
-  for (let i=0; i<REVISION_CYCLE.length; i++) {
-    const subj = REVISION_CYCLE[(startIdx+i)%REVISION_CYCLE.length];
-    const key  = subjectKey(subj);
-    if (!blocked.has(key) && !used.has(key)) return subj;
+  for(let i=0;i<REVISION_CYCLE.length;i++){
+    const subj=REVISION_CYCLE[(startIdx+i)%REVISION_CYCLE.length];
+    const key=subjectKey(subj);
+    if(!blocked.has(key)&&!used.has(key)) return subj;
   }
-  /* fallback: allow repeats but still skip blocked */
-  for (let i=0; i<REVISION_CYCLE.length; i++) {
-    const subj = REVISION_CYCLE[(startIdx+i)%REVISION_CYCLE.length];
-    if (!blocked.has(subjectKey(subj))) return subj;
+  for(let i=0;i<REVISION_CYCLE.length;i++){
+    const subj=REVISION_CYCLE[(startIdx+i)%REVISION_CYCLE.length];
+    if(!blocked.has(subjectKey(subj))) return subj;
   }
   return 'Free study';
 }
 
-/* ── Build one day's slots ─────────────────────────────────────────── */
-function buildDaySlots(dateISO, isSunday) {
-  const todayExams = EXAMS.filter(e => e.date === dateISO);
-  const blocked    = blockedOnDay(dateISO);
+function buildDaySlots(iso, isSunday) {
+  const todayExams = EXAMS.filter(e=>e.date===iso);
+  const blocked    = blockedOnDay(iso);
   const origin     = new Date('2026-03-29');
-  const dayIdx     = Math.floor((new Date(dateISO) - origin) / 86400000);
+  const dayIdx     = Math.floor((new Date(iso)-origin)/86400000);
   const cycleStart = dayIdx % REVISION_CYCLE.length;
 
-  /* upcoming (1-2 days away) exams not blocked today */
-  const target = new Date(dateISO);
-  const soonExams = EXAMS.filter(e => {
-    const diff = (new Date(e.date)-target)/86400000;
-    return diff>0 && diff<=2 && !blocked.has(subjectKey(e.subject));
+  const target = new Date(iso);
+  const soonExams = EXAMS.filter(e=>{
+    const diff=(new Date(e.date)-target)/86400000;
+    return diff>0&&diff<=2&&!blocked.has(subjectKey(e.subject));
   });
 
-  const hasTextiles = TEXTILES_DATES.has(dateISO);
+  const hasTextiles = TEXTILES_DATES.has(iso);
+  const DAY_START   = isSunday ? 11*60 : 9*60;
+  const DAY_END     = 18*60;
 
-  /* schedule skeleton */
-  const skeleton = isSunday
-    ? ['study','b15','study','lunch','study','b15','study']
-    : ['study','b15','study','lunch','study','b15','study','b15','study','wind'];
+  /* Exam windows with 15-min buffer */
+  const examWindows = todayExams
+    .filter(e=>e.dur)
+    .map(e=>({
+      start: Math.max(DAY_START, toMins(e.time)-15),
+      end:   Math.min(DAY_END,   toMins(e.time)+e.dur+15),
+      exam:  e
+    }))
+    .sort((a,b)=>a.start-b.start);
 
-  let hour = isSunday ? 11 : 9, min = 0;
+  /* If any exam at 09:00, revision starts at 13:30 */
+  const hasMorningExam = examWindows.some(w=>toMins(w.exam.time)<=9*60);
+  const effectiveStart = hasMorningExam ? 13*60+30 : DAY_START;
+
+  /* Free windows */
+  const freeWindows = [];
+  let cursor = effectiveStart;
+  for(const w of examWindows){
+    if(w.start>cursor) freeWindows.push({start:cursor,end:w.start});
+    cursor=Math.max(cursor,w.end);
+  }
+  if(cursor<DAY_END) freeWindows.push({start:cursor,end:DAY_END});
+
   const slots = [];
   let blockCount = 0;
   const used = new Set();
 
-  for (const entry of skeleton) {
-    if (entry==='b15')  { slots.push({type:'break',label:'15 min break',    time:fmt(hour,min)}); const n=addM(hour,min,15);  hour=n.h;min=n.m; }
-    else if(entry==='lunch'){ slots.push({type:'break',label:'Lunch — 30 min',time:fmt(hour,min)}); const n=addM(hour,min,30);  hour=n.h;min=n.m; }
-    else if(entry==='wind') { slots.push({type:'break',label:'Wind-down — 15 min',time:fmt(hour,min)}); const n=addM(hour,min,15);  hour=n.h;min=n.m; }
-    else {
-      const slotEnd = addM(hour,min,90);
-      let subj;
-      if (hasTextiles && blockCount < 2) {
-        subj = 'Art & Design: Textiles';
-      } else if (soonExams.length && blockCount<2) {
-        subj = soonExams[Math.min(blockCount,soonExams.length-1)].subject;
-        if (blocked.has(subjectKey(subj))) subj = pickSubject(cycleStart+blockCount, blocked, used);
-      } else {
-        subj = pickSubject(cycleStart+blockCount, blocked, used);
+  if(hasMorningExam){
+    slots.push({type:'morning-free',label:'Morning exam \u2014 revision starts 13:30'});
+  }
+
+  function nextSubj(){
+    if(hasTextiles&&blockCount<2) return 'Art & Design: Textiles';
+    if(soonExams.length&&blockCount<2){
+      const s=soonExams[Math.min(blockCount,soonExams.length-1)].subject;
+      if(!blocked.has(subjectKey(s))) return s;
+    }
+    return pickSubject(cycleStart+blockCount,blocked,used);
+  }
+
+  for(const win of freeWindows){
+    let pos=win.start;
+    if(win.end-pos<30) continue;
+
+    const prevExam=examWindows.find(w=>Math.abs(w.end-win.start)<=20);
+    if(prevExam&&!hasMorningExam){
+      slots.push({type:'gap',label:'Exam finished \u2014 short break',time:fmt(Math.floor(pos/60),pos%60)});
+    }
+
+    let firstInWin=true;
+    while(pos+90<=win.end){
+      if(pos>=12*60+15&&!used.has('__lunch__')&&pos+30<=win.end){
+        slots.push({type:'break',label:'Lunch \u2014 30 min',time:fmt(Math.floor(pos/60),pos%60)});
+        pos+=30; used.add('__lunch__'); firstInWin=true; continue;
       }
+      if(!firstInWin){
+        if(pos+15+90>win.end) break;
+        slots.push({type:'break',label:'15 min break',time:fmt(Math.floor(pos/60),pos%60)});
+        pos+=15;
+      }
+      if(pos+90>win.end) break;
+      const subj=nextSubj();
       used.add(subjectKey(subj));
-      const hint = soonExams.find(e=>e.subject===subj);
+      const end2=pos+90;
+      const hint=soonExams.find(e=>e.subject===subj);
       slots.push({
         type:'study',
-        time:fmt(hour,min),
-        endTime:fmt(slotEnd.h,slotEnd.m),
+        time:fmt(Math.floor(pos/60),pos%60),
+        endTime:fmt(Math.floor(end2/60),end2%60),
         subject:subj,
-        note: hint ? `Exam: ${hint.paper} on ${fmtDate(hint.date)}` : revisionNote(subj,blockCount),
+        note:hint?'Exam: '+hint.paper+' on '+fmtDate(hint.date):revisionNote(subj,blockCount),
       });
-      blockCount++;
-      hour=slotEnd.h; min=slotEnd.m;
+      blockCount++; pos=end2; firstInWin=false;
     }
   }
-  return {slots, todayExams};
+  return {slots,todayExams};
 }
 
-/* ── Render ────────────────────────────────────────────────────────── */
 const DAY_NAMES   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function weekWrap(n, ws, html){
-  return `<div class="week-block">
-    <div class="week-label">Week ${n} &mdash; ${fmtDate(dateStr(ws))}</div>
-    <div class="days-grid">${html}</div>
-  </div>`;
+function weekWrap(n,ws,html){
+  return '<div class="week-block"><div class="week-label">Week '+n+' \u2014 '+fmtDate(dateStr(ws))+'</div><div class="days-grid">'+html+'</div></div>';
 }
 
 function buildTimetable(){
-  const container = document.getElementById('timetable');
-  const start=new Date('2026-03-29'), end=new Date('2026-06-17');
-  let cur=new Date(start), ws=new Date(start);
-  let weeksHTML='', daysHTML='', weekNum=1, daysInWeek=0;
+  const container=document.getElementById('timetable');
+  const start=new Date('2026-03-29'),end=new Date('2026-06-17');
+  let cur=new Date(start),ws=new Date(start);
+  let weeksHTML='',daysHTML='',weekNum=1,daysInWeek=0;
 
   while(cur<=end){
     const dow=cur.getDay();
-    if(dow===0 && daysInWeek>0){
+    if(dow===0&&daysInWeek>0){
       weeksHTML+=weekWrap(weekNum,ws,daysHTML);
       weekNum++;daysHTML='';daysInWeek=0;ws=new Date(cur);
     }
-    const iso=dateStr(cur), isSun=dow===0;
+    const iso=dateStr(cur),isSun=dow===0;
     const {slots,todayExams}=buildDaySlots(iso,isSun);
     const hasExam=todayExams.length>0;
 
-    /* exam alert banners */
-    const alertsHTML = todayExams.map(e=>
-      `<div class="day-exam-alert"><span class="dot"></span>EXAM: ${e.subject} — ${e.paper} at ${e.time}${e.dur?' ('+e.dur+' min)':''}</div>`
+    const alertsHTML=todayExams.map(e=>
+      '<div class="day-exam-alert"><span class="dot"></span>EXAM: '+e.subject+' \u2014 '+e.paper+' at '+e.time+(e.dur?' ('+e.dur+' min)':'')+'</div>'
     ).join('');
 
-    /* exam slot cards at top of slots list */
-    const examCardsHTML = todayExams.length
-      ? `<div class="exam-divider">Today's exams</div>`
-        + todayExams.map(e=>`
-        <div class="slot-exam-card" data-subject="${subjectKey(e.subject)}" data-is-exam="true">
-          <span class="slot-time">${e.time}</span>
-          <div class="slot-content">
-            <div class="slot-subject">${e.subject} — ${e.paper}</div>
-            <div class="slot-detail">${e.dur?e.dur+' min':''}</div>
-          </div>
-        </div>`).join('')
-      : '';
+    const examCardsHTML=todayExams.length
+      ?'<div class="exam-divider">Today\'s exams</div>'+todayExams.map(e=>
+          '<div class="slot-exam-card" data-subject="'+subjectKey(e.subject)+'">'
+          +'<span class="slot-time">'+e.time+'</span>'
+          +'<div class="slot-content">'
+          +'<div class="slot-subject">'+e.subject+' \u2014 '+e.paper+'</div>'
+          +'<div class="slot-detail">'+(e.dur?e.dur+' min':'')+'</div>'
+          +'</div></div>'
+        ).join('')
+      :'';
 
-    const studySlotsHTML = slots.map(sl=>{
-      if(sl.type==='break') return `<div class="slot-break">${sl.time} — ${sl.label}</div>`;
-      return `<div class="slot ${subjectColor(sl.subject)}" data-subject="${subjectKey(sl.subject)}">
-        <span class="slot-time">${sl.time}</span>
-        <div class="slot-content">
-          <div class="slot-subject">${sl.subject}</div>
-          <div class="slot-detail">${sl.note}</div>
-        </div>
-      </div>`;
+    const studySlotsHTML=slots.map(sl=>{
+      if(sl.type==='break')       return '<div class="slot-break">'+sl.time+' \u2014 '+sl.label+'</div>';
+      if(sl.type==='gap')         return '<div class="slot-gap">'+sl.time+' \u2014 '+sl.label+'</div>';
+      if(sl.type==='morning-free')return '<div class="slot-morning-free">'+sl.label+'</div>';
+      return '<div class="slot '+subjectColor(sl.subject)+'" data-subject="'+subjectKey(sl.subject)+'">'
+        +'<span class="slot-time">'+sl.time+'</span>'
+        +'<div class="slot-content">'
+        +'<div class="slot-subject">'+sl.subject+'</div>'
+        +'<div class="slot-detail">'+sl.note+'</div>'
+        +'</div></div>';
     }).join('');
 
-    daysHTML+=`<div class="day-card" data-date="${iso}" data-has-exam="${hasExam}">
-      <div class="day-header">
-        <span class="day-name">${DAY_NAMES[dow]}</span>
-        <span class="day-date">${cur.getDate()} ${MONTH_NAMES[cur.getMonth()]}</span>
-      </div>
-      ${alertsHTML}
-      <div class="slots">${examCardsHTML}${studySlotsHTML}</div>
-    </div>`;
+    daysHTML+='<div class="day-card" data-date="'+iso+'" data-has-exam="'+hasExam+'">'
+      +'<div class="day-header"><span class="day-name">'+DAY_NAMES[dow]+'</span><span class="day-date">'+cur.getDate()+' '+MONTH_NAMES[cur.getMonth()]+'</span></div>'
+      +alertsHTML
+      +'<div class="slots">'+examCardsHTML+studySlotsHTML+'</div>'
+      +'</div>';
     daysInWeek++;
     cur=addDays(cur,1);
   }
   if(daysHTML) weeksHTML+=weekWrap(weekNum,ws,daysHTML);
   container.innerHTML=weeksHTML;
 
-  /* highlight today */
   const todayISO=dateStr(new Date());
-  const tc=container.querySelector(`[data-date="${todayISO}"]`);
+  const tc=container.querySelector('[data-date="'+todayISO+'"]');
   if(tc){tc.style.border='2px solid var(--teal)';tc.scrollIntoView({behavior:'smooth',block:'center'});}
 
-  /* progress */
-  const total=(end-start)/86400000, done=Math.max(0,(new Date()-start)/86400000);
+  const total=(end-start)/86400000,done=Math.max(0,(new Date()-start)/86400000);
   document.getElementById('prog').style.width=Math.min(100,(done/total)*100)+'%';
 }
 
-/* ── Filter state ──────────────────────────────────────────────────── */
-let activeView='all', activeSubject='all';
+let activeView='all',activeSubject='all';
 
 function applyFilters(){
   document.querySelectorAll('.day-card').forEach(card=>{
-    const examMatch = activeView==='all' || card.dataset.hasExam==='true';
-    card.classList.toggle('hidden',!examMatch);
+    card.classList.toggle('hidden',activeView==='exams'&&card.dataset.hasExam!=='true');
   });
-  document.querySelectorAll('.slot[data-subject], .slot-exam-card[data-subject]').forEach(sl=>{
-    const match = activeSubject==='all' || sl.dataset.subject===activeSubject;
-    sl.style.opacity = match?'1':'0.15';
-    sl.style.filter  = match?'none':'grayscale(1)';
+  document.querySelectorAll('.slot[data-subject],.slot-exam-card[data-subject]').forEach(sl=>{
+    const match=activeSubject==='all'||sl.dataset.subject===activeSubject;
+    sl.style.opacity=match?'1':'0.15';
+    sl.style.filter=match?'none':'grayscale(1)';
   });
   document.querySelectorAll('.week-block').forEach(wb=>{
-    const anyVisible=[...wb.querySelectorAll('.day-card')].some(c=>!c.classList.contains('hidden'));
-    wb.style.display=anyVisible?'':'none';
+    const any=[...wb.querySelectorAll('.day-card')].some(c=>!c.classList.contains('hidden'));
+    wb.style.display=any?'':'none';
   });
 }
 
@@ -420,7 +433,6 @@ function setView(val,el){
   el.classList.add('active');
   applyFilters();
 }
-
 function setSubject(val,el){
   activeSubject=val;
   document.querySelectorAll('.pill-subj').forEach(p=>p.classList.remove('active'));

@@ -73,6 +73,11 @@
   .s-art{background:#FBEAF0;color:#72243E;}
   .s-textiles{background:#F5E8F8;color:#6B2D8B;}
   .s-free{background:transparent;color:var(--muted);}
+  .slot-school-note{background:#E6F1FB;color:#185FA5;font-size:0.73rem;font-weight:500;padding:0.4rem 0.7rem;border-radius:6px;text-align:center;}
+  .day-badge{display:inline-block;font-size:0.65rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-left:6px;vertical-align:middle;}
+  .badge-school{background:#E6F1FB;color:#185FA5;}
+  .badge-study{background:#E1F5EE;color:#085041;}
+  .badge-exam{background:#FAECE7;color:#993C1D;}
   @media(max-width:600px){
     .hero{padding:1.5rem 1rem 1.25rem;}
     .main{padding:1rem 1rem 2rem;}
@@ -86,7 +91,7 @@
 
 <div class="hero">
   <h1>GCSE Revision Timetable</h1>
-  <p>29 March &ndash; 17 June 2026 &nbsp;&middot;&nbsp; 09:00&ndash;18:00 (11:00 Sundays) &nbsp;&middot;&nbsp; 15 min breaks included</p>
+  <p>29 March &ndash; 17 June 2026 &nbsp;&middot;&nbsp; School days: 18:30&ndash;19:45 &nbsp;&middot;&nbsp; Study leave &amp; holidays: 09:00&ndash;18:00</p>
 </div>
 <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
 
@@ -103,6 +108,8 @@
   <span class="legend-item"><span class="legend-dot" style="background:#72243E"></span>Art</span>
   <span class="legend-item"><span class="legend-dot" style="background:#6B2D8B"></span>Textiles</span>
   <span class="legend-item"><span class="legend-dot" style="background:#D85A30"></span>Exam day</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>School day (18:30)</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#085041"></span>Study leave</span>
 </div>
 
 <div class="filters">
@@ -246,6 +253,24 @@ function pickSubject(startIdx, blocked, used) {
   return 'Free study';
 }
 
+function dayType(iso) {
+  // Returns: 'textiles-exam' | 'school' | 'study-leave' | 'holiday'
+  const d   = new Date(iso);
+  const dow = d.getDay(); // 0=Sun,6=Sat
+  const isWeekend = dow===0||dow===6;
+
+  if (iso==='2026-04-22') return 'textiles-exam';
+
+  // School term: 21 Apr – 10 May (Mon-Fri only)
+  if (!isWeekend && iso>='2026-04-21' && iso<='2026-05-10') return 'school';
+
+  // Study leave: 11 May onwards (all days)
+  if (iso>='2026-05-11') return 'study-leave';
+
+  // Everything before 21 Apr (holiday / textiles prep)
+  return 'holiday';
+}
+
 function buildDaySlots(iso, isSunday) {
   const todayExams = EXAMS.filter(e=>e.date===iso);
   const blocked    = blockedOnDay(iso);
@@ -260,10 +285,33 @@ function buildDaySlots(iso, isSunday) {
   });
 
   const hasTextiles = TEXTILES_DATES.has(iso);
-  const DAY_START   = isSunday ? 11*60 : 9*60;
-  const DAY_END     = 18*60;
+  const type = dayType(iso);
 
-  /* Exam windows with 15-min buffer */
+  // ── Textiles exam day: no revision ────────────────────────────────
+  if (type==='textiles-exam') {
+    return {slots:[], todayExams};
+  }
+
+  // ── School day: 18:30–19:45 only (75 min, one block) ─────────────
+  if (type==='school') {
+    const subj = pickSubject(cycleStart, blocked, new Set());
+    const hint = soonExams.find(e=>e.subject===subj);
+    const slots = [
+      {type:'school-note',label:'School day \u2014 revision starts 18:30'},
+      {
+        type:'study',
+        time:'18:30', endTime:'19:45',
+        subject: subj,
+        note: hint?'Exam: '+hint.paper+' on '+fmtDate(hint.date):revisionNote(subj,0),
+      }
+    ];
+    return {slots, todayExams};
+  }
+
+  // ── Full-day schedule (holiday & study leave) ────────────────────
+  const DAY_START = isSunday ? 11*60 : 9*60;
+  const DAY_END   = 18*60;
+
   const examWindows = todayExams
     .filter(e=>e.dur)
     .map(e=>({
@@ -273,11 +321,9 @@ function buildDaySlots(iso, isSunday) {
     }))
     .sort((a,b)=>a.start-b.start);
 
-  /* If any exam at 09:00, revision starts at 13:30 */
   const hasMorningExam = examWindows.some(w=>toMins(w.exam.time)<=9*60);
   const effectiveStart = hasMorningExam ? 13*60+30 : DAY_START;
 
-  /* Free windows */
   const freeWindows = [];
   let cursor = effectiveStart;
   for(const w of examWindows){
@@ -341,12 +387,6 @@ function buildDaySlots(iso, isSunday) {
   return {slots,todayExams};
 }
 
-const DAY_NAMES   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-function weekWrap(n,ws,html){
-  return '<div class="week-block"><div class="week-label">Week '+n+' \u2014 '+fmtDate(dateStr(ws))+'</div><div class="days-grid">'+html+'</div></div>';
-}
 
 function buildTimetable(){
   const container=document.getElementById('timetable');
@@ -381,6 +421,7 @@ function buildTimetable(){
 
     const studySlotsHTML=slots.map(sl=>{
       if(sl.type==='break')       return '<div class="slot-break">'+sl.time+' \u2014 '+sl.label+'</div>';
+      if(sl.type==='school-note') return '<div class="slot-school-note">'+sl.label+'</div>';
       if(sl.type==='gap')         return '<div class="slot-gap">'+sl.time+' \u2014 '+sl.label+'</div>';
       if(sl.type==='morning-free')return '<div class="slot-morning-free">'+sl.label+'</div>';
       return '<div class="slot '+subjectColor(sl.subject)+'" data-subject="'+subjectKey(sl.subject)+'">'

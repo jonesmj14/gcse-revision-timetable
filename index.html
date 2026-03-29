@@ -73,6 +73,11 @@
   .s-art{background:#FBEAF0;color:#72243E;}
   .s-textiles{background:#F5E8F8;color:#6B2D8B;}
   .s-free{background:transparent;color:var(--muted);}
+  .slot-school-note{background:#E6F1FB;color:#185FA5;font-size:0.73rem;font-weight:500;padding:0.4rem 0.7rem;border-radius:6px;text-align:center;}
+  .day-badge{display:inline-block;font-size:0.65rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-left:6px;vertical-align:middle;}
+  .badge-school{background:#E6F1FB;color:#185FA5;}
+  .badge-study{background:#E1F5EE;color:#085041;}
+  .badge-exam{background:#FAECE7;color:#993C1D;}
   @media(max-width:600px){
     .hero{padding:1.5rem 1rem 1.25rem;}
     .main{padding:1rem 1rem 2rem;}
@@ -86,7 +91,7 @@
 
 <div class="hero">
   <h1>GCSE Revision Timetable</h1>
-  <p>29 March &ndash; 17 June 2026 &nbsp;&middot;&nbsp; 09:00&ndash;18:00 (11:00 Sundays) &nbsp;&middot;&nbsp; 15 min breaks included</p>
+  <p>29 March &ndash; 17 June 2026 &nbsp;&middot;&nbsp; School days: 18:30&ndash;19:45 &nbsp;&middot;&nbsp; Study leave &amp; holidays: 09:00&ndash;18:00</p>
 </div>
 <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
 
@@ -103,6 +108,8 @@
   <span class="legend-item"><span class="legend-dot" style="background:#72243E"></span>Art</span>
   <span class="legend-item"><span class="legend-dot" style="background:#6B2D8B"></span>Textiles</span>
   <span class="legend-item"><span class="legend-dot" style="background:#D85A30"></span>Exam day</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>School day (18:30)</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#085041"></span>Study leave</span>
 </div>
 
 <div class="filters">
@@ -131,6 +138,7 @@
 <div class="main" id="timetable"></div>
 
 <script>
+/* ── Exam data ──────────────────────────────────────────────────────── */
 const EXAMS = [
   {date:'2026-04-22',subject:'Art & Design: Textiles',paper:'External Task',          time:'08:45',dur:null},
   {date:'2026-05-07',subject:'History',               paper:'Structured Questions 12', time:'09:00',dur:120},
@@ -158,6 +166,7 @@ const EXAMS = [
   {date:'2026-06-17',subject:'Spanish',               paper:'Writing (H)',             time:'09:00',dur:80},
 ];
 
+/* 2 x 3-hour Textiles sessions on Sundays before 22 Apr exam */
 const TEXTILES_DATES = new Set(['2026-03-29','2026-04-05']);
 
 const REVISION_CYCLE = [
@@ -170,6 +179,10 @@ const REVISION_CYCLE = [
   'Religious Studies','English Language'
 ];
 
+const DAY_NAMES   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ── Helpers ────────────────────────────────────────────────────────── */
 const fmt     = (h,m) => String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
 const dateStr = d => d.toISOString().split('T')[0];
 const addDays = (d,n) => { const r=new Date(d); r.setDate(r.getDate()+n); return r; };
@@ -222,18 +235,15 @@ const RN = {
   'Art':        ['Portfolio review','Technique practice','Artist analysis','Final piece prep','Annotation'],
   'Textiles':   ['Fabric samples & swatches','Design development','Construction techniques','Designer research','Final piece work','Evaluation writing'],
 };
-function revisionNote(subj, i) {
-  const k = Object.keys(RN).find(k => subj.includes(k));
-  return k ? RN[k][i % RN[k].length] : 'Revision & practice';
-}
+const revisionNote = (subj,i) => { const k=Object.keys(RN).find(k=>subj.includes(k)); return k?RN[k][i%RN[k].length]:'Revision & practice'; };
 
-function blockedOnDay(iso) {
-  const s = new Set();
+const blockedOnDay = iso => {
+  const s=new Set();
   EXAMS.filter(e=>e.date===iso).forEach(e=>{ const k=subjectKey(e.subject); if(k) s.add(k); });
   return s;
-}
+};
 
-function pickSubject(startIdx, blocked, used) {
+const pickSubject = (startIdx,blocked,used) => {
   for(let i=0;i<REVISION_CYCLE.length;i++){
     const subj=REVISION_CYCLE[(startIdx+i)%REVISION_CYCLE.length];
     const key=subjectKey(subj);
@@ -244,78 +254,96 @@ function pickSubject(startIdx, blocked, used) {
     if(!blocked.has(subjectKey(subj))) return subj;
   }
   return 'Free study';
-}
+};
 
-function buildDaySlots(iso, isSunday) {
+/* ── Day type classifier ─────────────────────────────────────────────
+   textiles-exam  22 Apr only — no revision
+   school         Mon-Fri 21 Apr to 10 May — evening only 18:30-19:45
+   study-leave    11 May onwards (all days) — full day
+   holiday        everything else — full day
+*/
+const dayType = iso => {
+  const dow = new Date(iso).getDay();
+  const isWeekend = dow===0||dow===6;
+  if(iso==='2026-04-22') return 'textiles-exam';
+  if(!isWeekend && iso>='2026-04-21' && iso<='2026-05-10') return 'school';
+  if(iso>='2026-05-11') return 'study-leave';
+  return 'holiday';
+};
+
+/* ── Build one day's slots ───────────────────────────────────────────*/
+const buildDaySlots = (iso, isSunday) => {
   const todayExams = EXAMS.filter(e=>e.date===iso);
   const blocked    = blockedOnDay(iso);
   const origin     = new Date('2026-03-29');
   const dayIdx     = Math.floor((new Date(iso)-origin)/86400000);
   const cycleStart = dayIdx % REVISION_CYCLE.length;
-
-  const target = new Date(iso);
-  const soonExams = EXAMS.filter(e=>{
+  const target     = new Date(iso);
+  const soonExams  = EXAMS.filter(e=>{
     const diff=(new Date(e.date)-target)/86400000;
     return diff>0&&diff<=2&&!blocked.has(subjectKey(e.subject));
   });
-
   const hasTextiles = TEXTILES_DATES.has(iso);
-  const DAY_START   = isSunday ? 11*60 : 9*60;
-  const DAY_END     = 18*60;
+  const type = dayType(iso);
 
-  /* Exam windows with 15-min buffer */
+  /* Textiles exam day — no revision */
+  if(type==='textiles-exam') return {slots:[], todayExams};
+
+  /* School day — single 75-min evening block */
+  if(type==='school'){
+    const subj = pickSubject(cycleStart, blocked, new Set());
+    const hint = soonExams.find(e=>e.subject===subj);
+    return {slots:[
+      {type:'school-note', label:'School day — revision starts 18:30'},
+      {type:'study', time:'18:30', endTime:'19:45', subject:subj,
+       note: hint?'Exam: '+hint.paper+' on '+fmtDate(hint.date):revisionNote(subj,0)},
+    ], todayExams};
+  }
+
+  /* Full-day schedule */
+  const DAY_START = isSunday ? 11*60 : 9*60;
+  const DAY_END   = 18*60;
+
   const examWindows = todayExams
     .filter(e=>e.dur)
-    .map(e=>({
-      start: Math.max(DAY_START, toMins(e.time)-15),
-      end:   Math.min(DAY_END,   toMins(e.time)+e.dur+15),
-      exam:  e
-    }))
+    .map(e=>({start:Math.max(DAY_START,toMins(e.time)-15), end:Math.min(DAY_END,toMins(e.time)+e.dur+15), exam:e}))
     .sort((a,b)=>a.start-b.start);
 
-  /* If any exam at 09:00, revision starts at 13:30 */
   const hasMorningExam = examWindows.some(w=>toMins(w.exam.time)<=9*60);
   const effectiveStart = hasMorningExam ? 13*60+30 : DAY_START;
 
-  /* Free windows */
-  const freeWindows = [];
-  let cursor = effectiveStart;
+  const freeWindows=[];
+  let cursor=effectiveStart;
   for(const w of examWindows){
     if(w.start>cursor) freeWindows.push({start:cursor,end:w.start});
     cursor=Math.max(cursor,w.end);
   }
   if(cursor<DAY_END) freeWindows.push({start:cursor,end:DAY_END});
 
-  const slots = [];
-  let blockCount = 0;
-  const used = new Set();
+  const slots=[];
+  let blockCount=0;
+  const used=new Set();
 
-  if(hasMorningExam){
-    slots.push({type:'morning-free',label:'Morning exam \u2014 revision starts 13:30'});
-  }
+  if(hasMorningExam) slots.push({type:'morning-free',label:'Morning exam — revision starts 13:30'});
 
-  function nextSubj(){
+  const nextSubj = () => {
     if(hasTextiles&&blockCount<2) return 'Art & Design: Textiles';
     if(soonExams.length&&blockCount<2){
       const s=soonExams[Math.min(blockCount,soonExams.length-1)].subject;
       if(!blocked.has(subjectKey(s))) return s;
     }
     return pickSubject(cycleStart+blockCount,blocked,used);
-  }
+  };
 
   for(const win of freeWindows){
     let pos=win.start;
     if(win.end-pos<30) continue;
-
     const prevExam=examWindows.find(w=>Math.abs(w.end-win.start)<=20);
-    if(prevExam&&!hasMorningExam){
-      slots.push({type:'gap',label:'Exam finished \u2014 short break',time:fmt(Math.floor(pos/60),pos%60)});
-    }
-
+    if(prevExam&&!hasMorningExam) slots.push({type:'gap',label:'Exam finished — short break',time:fmt(Math.floor(pos/60),pos%60)});
     let firstInWin=true;
     while(pos+90<=win.end){
       if(pos>=12*60+15&&!used.has('__lunch__')&&pos+30<=win.end){
-        slots.push({type:'break',label:'Lunch \u2014 30 min',time:fmt(Math.floor(pos/60),pos%60)});
+        slots.push({type:'break',label:'Lunch — 30 min',time:fmt(Math.floor(pos/60),pos%60)});
         pos+=30; used.add('__lunch__'); firstInWin=true; continue;
       }
       if(!firstInWin){
@@ -328,71 +356,74 @@ function buildDaySlots(iso, isSunday) {
       used.add(subjectKey(subj));
       const end2=pos+90;
       const hint=soonExams.find(e=>e.subject===subj);
-      slots.push({
-        type:'study',
-        time:fmt(Math.floor(pos/60),pos%60),
-        endTime:fmt(Math.floor(end2/60),end2%60),
-        subject:subj,
-        note:hint?'Exam: '+hint.paper+' on '+fmtDate(hint.date):revisionNote(subj,blockCount),
-      });
+      slots.push({type:'study', time:fmt(Math.floor(pos/60),pos%60), endTime:fmt(Math.floor(end2/60),end2%60),
+        subject:subj, note:hint?'Exam: '+hint.paper+' on '+fmtDate(hint.date):revisionNote(subj,blockCount)});
       blockCount++; pos=end2; firstInWin=false;
     }
   }
   return {slots,todayExams};
-}
+};
 
-const DAY_NAMES   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+/* ── Render helpers ──────────────────────────────────────────────────*/
+const weekWrap = (n,ws,html) =>
+  '<div class="week-block"><div class="week-label">Week '+n+' — '+fmtDate(dateStr(ws))+'</div><div class="days-grid">'+html+'</div></div>';
 
-function weekWrap(n,ws,html){
-  return '<div class="week-block"><div class="week-label">Week '+n+' \u2014 '+fmtDate(dateStr(ws))+'</div><div class="days-grid">'+html+'</div></div>';
-}
+const badgeFor = type =>
+  type==='school'       ? '<span class="day-badge badge-school">School</span>'
+  : type==='study-leave'? '<span class="day-badge badge-study">Study leave</span>'
+  : type==='textiles-exam'?'<span class="day-badge badge-exam">Exam day</span>'
+  : '';
 
+const renderSlot = sl => {
+  if(sl.type==='break')        return '<div class="slot-break">'+sl.time+' — '+sl.label+'</div>';
+  if(sl.type==='gap')          return '<div class="slot-gap">'+sl.time+' — '+sl.label+'</div>';
+  if(sl.type==='morning-free') return '<div class="slot-morning-free">'+sl.label+'</div>';
+  if(sl.type==='school-note')  return '<div class="slot-school-note">'+sl.label+'</div>';
+  return '<div class="slot '+subjectColor(sl.subject)+'" data-subject="'+subjectKey(sl.subject)+'">'
+    +'<span class="slot-time">'+sl.time+'</span>'
+    +'<div class="slot-content">'
+    +'<div class="slot-subject">'+sl.subject+'</div>'
+    +'<div class="slot-detail">'+sl.note+'</div>'
+    +'</div></div>';
+};
+
+/* ── Build timetable ─────────────────────────────────────────────────*/
 function buildTimetable(){
   const container=document.getElementById('timetable');
-  const start=new Date('2026-03-29'),end=new Date('2026-06-17');
-  let cur=new Date(start),ws=new Date(start);
-  let weeksHTML='',daysHTML='',weekNum=1,daysInWeek=0;
+  const start=new Date('2026-03-29'), end=new Date('2026-06-17');
+  let cur=new Date(start), ws=new Date(start);
+  let weeksHTML='', daysHTML='', weekNum=1, daysInWeek=0;
 
   while(cur<=end){
     const dow=cur.getDay();
     if(dow===0&&daysInWeek>0){
       weeksHTML+=weekWrap(weekNum,ws,daysHTML);
-      weekNum++;daysHTML='';daysInWeek=0;ws=new Date(cur);
+      weekNum++; daysHTML=''; daysInWeek=0; ws=new Date(cur);
     }
-    const iso=dateStr(cur),isSun=dow===0;
+    const iso=dateStr(cur), isSun=dow===0;
     const {slots,todayExams}=buildDaySlots(iso,isSun);
     const hasExam=todayExams.length>0;
+    const type=dayType(iso);
 
     const alertsHTML=todayExams.map(e=>
-      '<div class="day-exam-alert"><span class="dot"></span>EXAM: '+e.subject+' \u2014 '+e.paper+' at '+e.time+(e.dur?' ('+e.dur+' min)':'')+'</div>'
+      '<div class="day-exam-alert"><span class="dot"></span>EXAM: '+e.subject+' — '+e.paper+' at '+e.time+(e.dur?' ('+e.dur+' min)':'')+'</div>'
     ).join('');
 
     const examCardsHTML=todayExams.length
-      ?'<div class="exam-divider">Today\'s exams</div>'+todayExams.map(e=>
+      ?'<div class="exam-divider">Today's exams</div>'+todayExams.map(e=>
           '<div class="slot-exam-card" data-subject="'+subjectKey(e.subject)+'">'
           +'<span class="slot-time">'+e.time+'</span>'
           +'<div class="slot-content">'
-          +'<div class="slot-subject">'+e.subject+' \u2014 '+e.paper+'</div>'
+          +'<div class="slot-subject">'+e.subject+' — '+e.paper+'</div>'
           +'<div class="slot-detail">'+(e.dur?e.dur+' min':'')+'</div>'
           +'</div></div>'
         ).join('')
       :'';
 
-    const studySlotsHTML=slots.map(sl=>{
-      if(sl.type==='break')       return '<div class="slot-break">'+sl.time+' \u2014 '+sl.label+'</div>';
-      if(sl.type==='gap')         return '<div class="slot-gap">'+sl.time+' \u2014 '+sl.label+'</div>';
-      if(sl.type==='morning-free')return '<div class="slot-morning-free">'+sl.label+'</div>';
-      return '<div class="slot '+subjectColor(sl.subject)+'" data-subject="'+subjectKey(sl.subject)+'">'
-        +'<span class="slot-time">'+sl.time+'</span>'
-        +'<div class="slot-content">'
-        +'<div class="slot-subject">'+sl.subject+'</div>'
-        +'<div class="slot-detail">'+sl.note+'</div>'
-        +'</div></div>';
-    }).join('');
+    const studySlotsHTML=slots.map(renderSlot).join('');
 
     daysHTML+='<div class="day-card" data-date="'+iso+'" data-has-exam="'+hasExam+'">'
-      +'<div class="day-header"><span class="day-name">'+DAY_NAMES[dow]+'</span><span class="day-date">'+cur.getDate()+' '+MONTH_NAMES[cur.getMonth()]+'</span></div>'
+      +'<div class="day-header"><span class="day-name">'+DAY_NAMES[dow]+badgeFor(type)+'</span><span class="day-date">'+cur.getDate()+' '+MONTH_NAMES[cur.getMonth()]+'</span></div>'
       +alertsHTML
       +'<div class="slots">'+examCardsHTML+studySlotsHTML+'</div>'
       +'</div>';
@@ -406,15 +437,16 @@ function buildTimetable(){
   const tc=container.querySelector('[data-date="'+todayISO+'"]');
   if(tc){tc.style.border='2px solid var(--teal)';tc.scrollIntoView({behavior:'smooth',block:'center'});}
 
-  const total=(end-start)/86400000,done=Math.max(0,(new Date()-start)/86400000);
+  const total=(end-start)/86400000, done=Math.max(0,(new Date()-start)/86400000);
   document.getElementById('prog').style.width=Math.min(100,(done/total)*100)+'%';
 }
 
-let activeView='all',activeSubject='all';
+/* ── Filters ─────────────────────────────────────────────────────────*/
+let activeView='all', activeSubject='all';
 
-function applyFilters(){
+const applyFilters = () => {
   document.querySelectorAll('.day-card').forEach(card=>{
-    card.classList.toggle('hidden',activeView==='exams'&&card.dataset.hasExam!=='true');
+    card.classList.toggle('hidden', activeView==='exams'&&card.dataset.hasExam!=='true');
   });
   document.querySelectorAll('.slot[data-subject],.slot-exam-card[data-subject]').forEach(sl=>{
     const match=activeSubject==='all'||sl.dataset.subject===activeSubject;
@@ -425,20 +457,21 @@ function applyFilters(){
     const any=[...wb.querySelectorAll('.day-card')].some(c=>!c.classList.contains('hidden'));
     wb.style.display=any?'':'none';
   });
-}
+};
 
-function setView(val,el){
+const setView = (val,el) => {
   activeView=val;
   document.querySelectorAll('.pill-view-all,.pill-exams').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   applyFilters();
-}
-function setSubject(val,el){
+};
+
+const setSubject = (val,el) => {
   activeSubject=val;
   document.querySelectorAll('.pill-subj').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   applyFilters();
-}
+};
 
 buildTimetable();
 </script>

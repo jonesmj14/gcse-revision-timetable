@@ -266,13 +266,14 @@ const dayType = iso => {
   const dow = new Date(iso).getDay();
   const isWeekend = dow===0||dow===6;
   if(iso==='2026-04-22') return 'textiles-exam';
-  if(!isWeekend && iso>='2026-04-21' && iso<='2026-05-10') return 'school';
-  if(iso>='2026-05-11') return 'study-leave';
+  if(!isWeekend && iso>='2026-04-21' && iso<='2026-05-08') return 'school';
+  if(iso>='2026-05-09') return 'study-leave';
   return 'holiday';
 };
 
 /* ── Build one day's slots ───────────────────────────────────────────*/
-const buildDaySlots = (iso, isSunday) => {
+const buildDaySlots = (iso, dow) => {
+  const isSunday = dow===0;
   const todayExams = EXAMS.filter(e=>e.date===iso);
   const blocked    = blockedOnDay(iso);
   const origin     = new Date('2026-03-29');
@@ -301,7 +302,7 @@ const buildDaySlots = (iso, isSunday) => {
   }
 
   /* Full-day schedule */
-  const DAY_START = isSunday ? 11*60 : 9*60;
+  const DAY_START = isSunday ? 11*60 : 9*60;  /* Sun starts 11:00, Sat+weekdays 09:00 */
   const DAY_END   = 18*60;
 
   const examWindows = todayExams
@@ -401,7 +402,7 @@ function buildTimetable(){
       weekNum++; daysHTML=''; daysInWeek=0; ws=new Date(cur);
     }
     const iso=dateStr(cur), isSun=dow===0;
-    const {slots,todayExams}=buildDaySlots(iso,isSun);
+    const {slots,todayExams}=buildDaySlots(iso,dow);
     const hasExam=todayExams.length>0;
     const type=dayType(iso);
 
@@ -410,7 +411,7 @@ function buildTimetable(){
     ).join('');
 
     const examCardsHTML=todayExams.length
-      ?'<div class="exam-divider">Today's exams</div>'+todayExams.map(e=>
+      ?'<div class="exam-divider">Today&#39;s exams</div>'+todayExams.map(e=>
           '<div class="slot-exam-card" data-subject="'+subjectKey(e.subject)+'">'
           +'<span class="slot-time">'+e.time+'</span>'
           +'<div class="slot-content">'

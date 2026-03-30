@@ -287,83 +287,95 @@ const buildDaySlots = (iso, dow) => {
   const hasTextiles = TEXTILES_DATES.has(iso);
   const type = dayType(iso);
 
-  /* Textiles exam day — no revision */
   if(type==='textiles-exam') return {slots:[], todayExams};
 
-  /* School day — single 75-min evening block */
   if(type==='school'){
     const subj = pickSubject(cycleStart, blocked, new Set());
     const hint = soonExams.find(e=>e.subject===subj);
     return {slots:[
-      {type:'school-note', label:'School day — revision starts 18:30'},
+      {type:'school-note', label:'School day \u2014 revision starts 18:30'},
       {type:'study', time:'18:30', endTime:'19:45', subject:subj,
        note: hint?'Exam: '+hint.paper+' on '+fmtDate(hint.date):revisionNote(subj,0)},
     ], todayExams};
   }
 
-  /* Full-day schedule */
-  const DAY_START = isSunday ? 11*60 : 9*60;  /* Sun starts 11:00, Sat+weekdays 09:00 */
-  const DAY_END   = 18*60;
+  /* ── Fixed daily structure ──────────────────────────────────────────
+     Weekday/Sat:  09:00 start
+     Sunday:       11:00 start
+     Both end:     18:30
+     Morning:      2 x 90-min blocks + 15-min break between
+     Lunch:        13:00–14:00 (fixed, 1 hour)
+     Afternoon:    2 x 90-min blocks + 15-min break between
+  ─────────────────────────────────────────────────────────────────── */
+  const DAY_START = isSunday ? 11*60 : 9*60;
 
+  // Check if a 09:00 exam blocks the whole morning
   const examWindows = todayExams
     .filter(e=>e.dur)
-    .map(e=>({start:Math.max(DAY_START,toMins(e.time)-15), end:Math.min(DAY_END,toMins(e.time)+e.dur+15), exam:e}))
+    .map(e=>({start:Math.max(DAY_START,toMins(e.time)-15), end:Math.min(18*60+30,toMins(e.time)+e.dur+15), exam:e}))
     .sort((a,b)=>a.start-b.start);
-
   const hasMorningExam = examWindows.some(w=>toMins(w.exam.time)<=9*60);
-  const effectiveStart = hasMorningExam ? 13*60+30 : DAY_START;
 
-  const freeWindows=[];
-  let cursor=effectiveStart;
-  for(const w of examWindows){
-    if(w.start>cursor) freeWindows.push({start:cursor,end:w.start});
-    cursor=Math.max(cursor,w.end);
-  }
-  if(cursor<DAY_END) freeWindows.push({start:cursor,end:DAY_END});
+  const slots = [];
+  let blockCount = 0;
+  const used = new Set();
 
-  const slots=[];
-  let blockCount=0;
-  const used=new Set();
-
-  if(hasMorningExam) slots.push({type:'morning-free',label:'Morning exam — revision starts 13:30'});
-
-  const nextSubj = () => {
-    if(hasTextiles&&blockCount<2) return 'Art & Design: Textiles';
-    if(soonExams.length&&blockCount<2){
+  function nextSubj(){
+    if(hasTextiles && blockCount<2) return 'Art & Design: Textiles';
+    if(soonExams.length && blockCount<2){
       const s=soonExams[Math.min(blockCount,soonExams.length-1)].subject;
       if(!blocked.has(subjectKey(s))) return s;
     }
-    return pickSubject(cycleStart+blockCount,blocked,used);
-  };
-
-  for(const win of freeWindows){
-    let pos=win.start;
-    if(win.end-pos<30) continue;
-    const prevExam=examWindows.find(w=>Math.abs(w.end-win.start)<=20);
-    if(prevExam&&!hasMorningExam) slots.push({type:'gap',label:'Exam finished — short break',time:fmt(Math.floor(pos/60),pos%60)});
-    let firstInWin=true;
-    while(pos+90<=win.end){
-      if(pos>=12*60+15&&!used.has('__lunch__')&&pos+30<=win.end){
-        slots.push({type:'break',label:'Lunch — 30 min',time:fmt(Math.floor(pos/60),pos%60)});
-        pos+=30; used.add('__lunch__'); firstInWin=true; continue;
-      }
-      if(!firstInWin){
-        if(pos+15+90>win.end) break;
-        slots.push({type:'break',label:'15 min break',time:fmt(Math.floor(pos/60),pos%60)});
-        pos+=15;
-      }
-      if(pos+90>win.end) break;
-      const subj=nextSubj();
-      used.add(subjectKey(subj));
-      const end2=pos+90;
-      const hint=soonExams.find(e=>e.subject===subj);
-      slots.push({type:'study', time:fmt(Math.floor(pos/60),pos%60), endTime:fmt(Math.floor(end2/60),end2%60),
-        subject:subj, note:hint?'Exam: '+hint.paper+' on '+fmtDate(hint.date):revisionNote(subj,blockCount)});
-      blockCount++; pos=end2; firstInWin=false;
-    }
+    return pickSubject(cycleStart+blockCount, blocked, used);
   }
-  return {slots,todayExams};
+
+  function addStudy(startMins, endMins){
+    const subj=nextSubj();
+    used.add(subjectKey(subj));
+    const hint=soonExams.find(e=>e.subject===subj);
+    slots.push({type:'study',
+      time:fmtMins(startMins), endTime:fmtMins(endMins),
+      subject:subj,
+      note:hint?'Exam: '+hint.paper+' on '+fmtDate(hint.date):revisionNote(subj,blockCount)});
+    blockCount++;
+  }
+
+  function fmtMins(m){ return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); }
+
+  if(hasMorningExam){
+    // Morning blocked — show banner, afternoon only (14:00 onwards after exam)
+    slots.push({type:'morning-free', label:'Morning exam \u2014 revision starts 14:00'});
+    // Afternoon: 14:00–15:30, break, 15:45–17:15
+    addStudy(14*60, 15*60+30);
+    slots.push({type:'break', label:'15 min break', time:'15:30'});
+    addStudy(15*60+45, 17*60+15);
+  } else {
+    // Morning block 1
+    addStudy(DAY_START, DAY_START+90);
+    // 15-min break
+    slots.push({type:'break', label:'15 min break', time:fmtMins(DAY_START+90)});
+    // Morning block 2
+    addStudy(DAY_START+105, DAY_START+195);
+    // Free time to lunch (show as a short wind-down if gap > 0)
+    const afterMorn = DAY_START+195;
+    if(afterMorn < 13*60){
+      slots.push({type:'break', label:'Free time \u2014 to 13:00', time:fmtMins(afterMorn)});
+    }
+    // Fixed lunch 13:00–14:00
+    slots.push({type:'break', label:'Lunch \u2014 13:00 to 14:00', time:'13:00'});
+    // Afternoon block 1: 14:00–15:30
+    addStudy(14*60, 15*60+30);
+    // 15-min break
+    slots.push({type:'break', label:'15 min break', time:'15:30'});
+    // Afternoon block 2: 15:45–17:15
+    addStudy(15*60+45, 17*60+15);
+    // Wind-down 17:15–18:30
+    slots.push({type:'break', label:'Wind-down \u2014 17:15 to 18:30', time:'17:15'});
+  }
+
+  return {slots, todayExams};
 };
+
 
 /* ── Render helpers ──────────────────────────────────────────────────*/
 const weekWrap = (n,ws,html) =>
@@ -434,11 +446,11 @@ function buildTimetable(){
   if(daysHTML) weeksHTML+=weekWrap(weekNum,ws,daysHTML);
   container.innerHTML=weeksHTML;
 
-  const todayISO=dateStr(new Date());
+  const todayISO='2026-03-30';
   const tc=container.querySelector('[data-date="'+todayISO+'"]');
   if(tc){tc.style.border='2px solid var(--teal)';tc.scrollIntoView({behavior:'smooth',block:'center'});}
 
-  const total=(end-start)/86400000, done=Math.max(0,(new Date()-start)/86400000);
+  const today_=new Date('2026-03-30'); const total=(end-start)/86400000, done=Math.max(0,(today_-start)/86400000);
   document.getElementById('prog').style.width=Math.min(100,(done/total)*100)+'%';
 }
 
